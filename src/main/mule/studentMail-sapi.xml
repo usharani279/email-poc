@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	
+	
+	
+	<flow name="mail-apiFlow" doc:id="56d206a9-66fb-4f7e-93ef-5f6360424bb5" >
+		<file:read doc:name="Reading Excel file" doc:id="6618da3b-909c-43dc-9cbd-c677c93c09b0" config-ref="File_Config" path="#[attributes.headers.filepath]" outputMimeType="application/xlsx"/>
+		<ee:transform doc:name="studentData" doc:id="e2e39c74-cdeb-4e7d-914e-6e4b98e8ec25" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="studentData" ><![CDATA[%dw 2.0
+output application/json 
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="b2c0a72a-33e4-4c22-9471-afb6f1b2e2e1" collection="#[vars.studentData.student]">
+			<ee:transform doc:name="currentPayload and validations" doc:id="40880a3f-053c-4baf-aa8a-942cf57bd1cc" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="currentPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					<ee:set-variable variableName="studentBranch" ><![CDATA[%dw 2.0
+output application/json
+var a= payload.Branch
+var branches = ["CSE", "EEE", "IT", "ECE", "EIE"]
+---
+branches contains  payload.Branch]]></ee:set-variable>
+					<ee:set-variable variableName="studentGrade" ><![CDATA[%dw 2.0
+output application/json
+var a= payload.Grade
+var grades = ["A","B","C"]
+---
+grades contains  payload.Grade]]></ee:set-variable>
+					<ee:set-variable variableName="studentSemester" ><![CDATA[%dw 2.0
+output application/json
+var a= payload.Semester
+var semester = ["1_1","1_2","2_1","2_2","3_1","3_2","4_1","4_2"]
+---
+semester contains  payload.Semester
+]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<try doc:name="Try" doc:id="d5ee9e1b-f54b-4076-a30a-545c6594fa1c">
+			<flow-ref doc:name="calling mail-apiFlow1" doc:id="24e241ac-c6c6-4de6-9299-e43006b3b68f" name="mail-apiFlow1" />
+				<error-handler>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1aebf127-ee5d-4aad-8e46-130fa47b56bd" type="ANY">
+						<ee:transform doc:name="currentPayload with SentNotification N" doc:id="35063539-f9dc-4d18-acff-901657d01e77">
+						<ee:message>
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.currentPayload ++ 
+{
+"SentNotification" : "N"
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+						</ee:variables>
+					</ee:transform>
+					</on-error-continue>
+			</error-handler>
+		</try>
+			<ee:transform doc:name="finalData" doc:id="fa505bfb-b462-4b98-8913-07a5483ee947" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="finalData" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<db:insert doc:id="6fb6827c-fe53-4f95-9325-87ff774c37a2" config-ref="Database_Config" doc:name="InsertingData">
+				<db:sql><![CDATA[insert into student (RollNo, StudentName, EmailId, University, College, BatchCode, Branch, Semester, Grade, FinalResult,SentNotification)
+values ( :RollNo,:StudentName,:EmailId,:University,:College,:BatchCode,:Branch,:Semester,:Grade,:FinalResult,:SentNotification)]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+	"RollNo" : vars.finalData.RollNo,
+	"StudentName" : vars.finalData.StudentName,
+	"EmailId" : vars.finalData.EmailId,
+	"University" : vars.finalData.University,
+	"College" : vars.finalData.College,
+	"BatchCode" : vars.finalData.BatchCode,
+	"Branch" : vars.finalData.Branch,
+	"Semester" : vars.finalData.Semester,
+	"Grade" : vars.finalData.Grade,
+	"FinalResult" : vars.finalData.FinalResult,
+	"SentNotification" : vars.finalData.SentNotification
+}]]]></db:input-parameters>
+			</db:insert>
+			<logger level="INFO" doc:name="inserted successfully message" doc:id="3d97ac35-9c4e-4a1a-b03c-9b7436572652" message='#["inserted successfully"]'/>
+		</foreach>
+		<db:select doc:name="fetching studentData" doc:id="7faa9119-b70a-4057-8de8-40b11058dc88" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from student;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="StudentData" doc:id="9f8682b9-d007-4e37-b517-f387d696228c">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		
+	</flow>
+	<sub-flow name="mail-apiFlow1" doc:id="9b793952-5980-494b-bebf-110641fc7585" >
+		<ee:transform doc:name="mapping currentPayload" doc:id="3af5e804-9a41-46ad-ae61-f28c8d840a59">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+([payload] map {
+	"StudentName" : $.StudentName,
+    "Grade" : $.Grade,
+    "FinalResult" : $.FinalResult,
+    "RollNo" : $.RollNo,
+    "EmailId" : $.EmailId,
+    "Branch" : $.Branch 
+ } ) ]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<validation:is-email doc:name="validating email" doc:id="8b91d992-0489-4f7a-9a9e-a5d27ab89607" config-ref="Validation_Config" email="#[payload[0].EmailId]" />
+		<choice doc:name="Choice" doc:id="4f209384-b035-4315-9487-68f5e9cc6077">
+			<when expression="#[vars.studentBranch and vars.studentGrade and vars.studentSemester]">
+				<set-variable value='#[%dw 2.0&#10;output application/xml&#10;---&#10;"html": {&#10;	"style": "table, th, td {&#10;&#10;&#10;&#10;  border:1px solid black;&#10;&#10;}",&#10;	"body": {&#10;		"h2": "Engineering Results",&#10;		table @(style: "width:100%"): {&#10;			"tr": {&#10;				"th": "Grade",&#10;				"th": "FinalResult",&#10;				"th": "RollNo",&#10;				"th": "EmailId"&#10;			},&#10;			"tr": {&#10;				"td": payload."Grade",&#10;				"td": payload."FinalResult",&#10;				"td": payload."RollNo",&#10;				"td": payload."EmailId"&#10;			}&#10;		}&#10;	}&#10;}]' doc:name="code with table format" doc:id="53ed184d-3e37-4e77-8ec6-f9a7e41d6aee" variableName="body" mimeType="text/html" />
+				<email:send doc:id="b2220b5e-cef6-420f-9469-553fae3c16f2" config-ref="Email_SMTP" fromAddress="palavelliusharani1114@gmail.com" subject='#[payload[0].RollNo ++"_" ++ payload[0].StudentName]' doc:name="Sending email">
+			<email:to-addresses>
+				<email:to-address value="#[payload[0].EmailId]" />
+			</email:to-addresses>
+			<email:attachments><![CDATA[#["Results" : vars.body]]]></email:attachments>
+		</email:send>
+				<ee:transform doc:name="currentPayload with SentNotification Y" doc:id="69037497-64dc-4e60-bf8c-00be9bf19d0f">
+			<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.currentPayload  ++ 
+{
+"SentNotification" : "Y"
+}]]></ee:set-payload>
+			</ee:message>
+					<ee:variables>
+					</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="currentPayload with SentNotification N" doc:id="4b79a904-5e3e-4d63-8b9f-30179b112d6d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.currentPayload ++ 
+{
+"SentNotification" : "N"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="mail not sent message" doc:id="842e8c91-47ca-4c1a-b9fc-a782f03b4d24" message='#["mail not sent"]' />
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>

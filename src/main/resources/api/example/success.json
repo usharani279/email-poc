@@ -1,0 +1,28 @@
+[
+    {
+        "College": "MLR",
+        "FinalResult": "Pass",
+        "StudentName": "Amrutha",
+        "University": "JNTU",
+        "Grade": "A",
+        "BatchCode": "RH",
+        "RollNo": "15RH1",
+        "EmailId": "usharani.palavelli@gmail.com",
+        "Semester": "3_1",
+        "Branch": "ECE",
+        "SentNotification": "Y"
+    },
+    {
+        "College": "MLR",
+        "FinalResult": "pass",
+        "StudentName": "Shalini",
+        "University": "JNTU",
+        "Grade": "E",
+        "BatchCode": "RH",
+        "RollNo": "15RH2",
+        "EmailId": "shivamhtripathi@gmail.com",
+        "Semester": "5_1",
+        "Branch": "ECE",
+        "SentNotification": "N"
+    }
+]

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="mail-api-test-suite.xml" />
+	<munit:test name="mail-api-test-suite-mail-apiFlowTest" doc:id="17a8e6a4-91cb-4b5b-b276-c90accbf240b" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="fc2cad6b-868b-45b5-99e6-c3ed56ba0045" processor="validation:is-email">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a23b0fdf-7ce9-47fa-a1bc-1ee935617886" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="84ad45dd-7ab1-45f4-949a-ef70dae3a7f9" processor="email:send">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="16c9ebd7-7b62-4577-9a57-59bb3ba0b780" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[&#10;[&#10;  {&#10;    "College": "MLR",&#10;    "FinalResult": "Pass",&#10;    "StudentName": "Amrutha",&#10;    "University": "JNTU",&#10;    "Grade": "A",&#10;    "BatchCode": "RH",&#10;    "RollNo": "15RH1",&#10;    "EmailId": "usharani.palavelli@gmail.com",&#10;    "Semester": "3_1",&#10;    "Branch": "ECE",&#10;    "SentNotification": "Y"&#10;  },&#10;  {&#10;    "College": "MLR",&#10;    "FinalResult": "Fail",&#10;    "StudentName": "Shalini",&#10;    "University": "JNTU",&#10;    "Grade": "E",&#10;    "BatchCode": "RH",&#10;    "RollNo": "15RH2",&#10;    "EmailId": "Shalini@gmailcom",&#10;    "Semester": "3_2",&#10;    "Branch": "CSE",&#10;    "SentNotification": "N"&#10;  },&#10;  {&#10;    "College": "VNR",&#10;    "FinalResult": "Pass",&#10;    "StudentName": "sam",&#10;    "University": "JNTU",&#10;    "Grade": "B",&#10;    "BatchCode": "RH",&#10;    "RollNo": "15RH3",&#10;    "EmailId": "sam@gmail.com",&#10;    "Semester": "4_1",&#10;    "Branch": "EEE",&#10;    "SentNotification": "Y"&#10;  }]]' mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="a065fac7-eff6-48ec-91df-1ddb3f992a57" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="6aa73d6a-573c-4404-be75-fe3f6d81ac38" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Insert" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="bd2a9397-accc-4554-8581-723a1d8cb4cb" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="1c6b27b4-febf-4dc7-9017-f83489c39a34" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="2e1a5d9a-5f67-46b7-b685-ba892e4c2ee8" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://student.json','application/json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to mail-apiFlow" doc:id="cab81cec-8e58-4497-b45d-5d6c854a1f58" name="get:\mail:mail-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="832fa95b-2200-4b40-9175-0a761a75968e" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mail-api-test-suite-exception-mail-apiFlowTest" doc:id="ffe58ed3-183d-4a7b-8a76-73e34e119347" description="Test" expectedErrorType="ANY">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="64248957-6ac2-4a27-b0de-b7e1dedf6a72" processor="validation:is-email" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a23b0fdf-7ce9-47fa-a1bc-1ee935617886" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to mail-apiFlow" doc:id="f2d14afb-c37d-4946-b698-e0ba2977c28a" name="mail-apiFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="41bb7a8c-82f8-417b-9b2e-9a98068aaefb" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mail-api-test-APIKIT:BAD_REQUEST-suiteTest" doc:id="8d664a01-a3fb-4538-abba-2c14e6964c9b" expectedErrorType="APIKIT:BAD_REQUEST">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="12f10c3a-62e4-440c-b186-abf1d4ef51ba" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="mail-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="e3961648-7bca-4c90-bd26-2dc1de21b481" name="mail-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="8be299cb-cbda-4bc5-9517-ae7d800477f4" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mail-api-test-APIKIT:METHOD_NOT_ALLOWED-suiteTest" doc:id="65685667-c3f9-4801-9906-2f8b9b5a2cf3" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="3adf0901-dd98-4a3e-899d-d3a84f5a8b47" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="mail-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="10ad57e9-4e0a-476c-9d05-3b54d3274f28" name="mail-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="97a343d6-ebb7-47d0-8664-aec34fac930d" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mail-api-test-APIKIT:NOT_ACCEPTABLE-suiteTest" doc:id="e748dfa2-de1d-43e9-9a59-bf5e0a5896d9" expectedErrorType="APIKIT:NOT_ACCEPTABLE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="2c3ca01e-7034-4b48-b361-30238d9b212c" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="mail-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="cb9d7169-0341-4d76-9485-e5849d1b0a27" name="mail-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d5e3b3c3-c463-4891-9e72-76aa51abb5ed" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mail-api-test-APIKIT:NOT_FOUND-suiteTest" doc:id="5968d28d-2b54-45d3-9dc0-2cae59ddac3d" expectedErrorType="APIKIT:NOT_FOUND">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="d0f42c88-5f96-454d-84fc-1f368b1b8de4" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="mail-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="d10ac72a-1856-4775-b70f-343451221be5" name="mail-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="6f87fda5-61bf-42d4-b929-a79a30d33669" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mail-api-test-APIKIT:NOT_IMPLEMENTED-suiteTest" doc:id="0515d534-c566-4cb4-a1a4-bc769c57e986" expectedErrorType="APIKIT:NOT_IMPLEMENTED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="3fc482c3-7022-4d23-9b88-cfd7dc6bfffa" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="mail-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="3f93e863-61d7-47b9-86ca-05fd10b157b1" name="mail-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="fa8891fa-606f-44d0-aeb2-baec460051a0" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mail-api-test-APIKIT:UNSUPPORTED_MEDIA_TYPE-suiteTest" doc:id="d7b413b8-e520-40cb-921e-d899eb1717d8" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="6c4f013d-8c41-4af7-9a0e-4409074076b8" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="mail-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="2f4e6181-172e-45a4-8dcb-9b49d1ef1753" name="mail-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="9d908076-ee7c-4e2b-8f71-83b35c938f6b" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd 
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a42f12c1-08f6-4921-adc5-0988c3d0ae62" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+<file:config name="File_Config" doc:name="File Config" doc:id="1e0d5354-9081-4802-b4bf-2c7b466816e8" >
+		<file:connection />
+	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="c65332b5-84e3-4f49-8a14-22ab6b3b41fd" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.username}" password="${db.password}" database="${db.database}" />
+	</db:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="b81cfb84-cce0-4976-ac64-01deac2a205f" >
+		<email:smtp-connection host="${mail.host}" port="${mail.port}" user="${mail.username}" password="${mail.password}" timeoutUnit="MINUTES">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="87c87f9e-123b-4848-bd3d-fb3dc6a3308e" file="app.properties" />
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="4fb3121c-8a26-4008-937a-945e1f557aea" />
+	<configuration doc:name="Configuration" doc:id="59c05a93-2d2f-420b-a9f3-1a536dd8f1bd" defaultErrorHandler-ref="errorError_Handler" />
+	
+	
+	
+</mule>

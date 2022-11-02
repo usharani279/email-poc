@@ -1,0 +1,19 @@
+#%RAML 1.0
+title: mail-api
+description: send email to students with their grades
+traits:
+  error_responce: !include traits.raml
+/mail:
+  is: [error_responce]
+  get:
+    headers:
+      filepath:
+        type: string
+        required: true 
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include example/success.json
+              
+    
